@@ -67,78 +67,78 @@ class PokerApp:
         self.crupier_label = tk.Label( control_frame, text = f"Crupier Saldo: { self.crupier_saldo }" )
         self.crupier_label.grid( row = 0, column = 4, padx = 5 )
 
-    def reset_all(self):
+    def reset_all( self ):
         for row in self.data:
             for key in row:
-                row[key] = 0.0 if key != "Jugador" else row[key]
+                row[ key ] = 0.0 if key != "Jugador" else row[ key ]
         self.crupier_saldo = 0.0
         self.update_table()
         self.update_totals()
-        self.crupier_label.config(text=f"Crupier Saldo: {self.crupier_saldo}")
+        self.crupier_label.config( text = f"Crupier Saldo: { self.crupier_saldo }" )
 
-    def select_winner(self):
-        winner = simpledialog.askstring("Seleccionar Ganador", "Ingrese el ganador (R, A, V, M):")
-        if winner in ["R", "A", "V", "M"]:
-            winner_index = ["R", "A", "V", "M"].index(winner)
-            bote_total = sum(self.data[i]['Apostado por jugador'] for i in range(len(self.data)))
-            rake_total = bote_total * (self.rake_var.get() / 100)
+    def select_winner( self ):
+        winner = simpledialog.askstring( "Seleccionar Ganador", "Ingrese el ganador (R, A, V, M):" )
+        if winner in [ "R", "A", "V", "M" ]:
+            winner_index = [ "R", "A", "V", "M" ].index( winner )
+            bote_total = sum( self.data[ i ][ 'Apostado por jugador' ] for i in range( len( self.data ) ) )
+            rake_total = bote_total * ( self.rake_var.get() / 100 )
             premio_total = bote_total - rake_total
 
             # Actualizar saldo del ganador
-            self.data[winner_index]['Saldo'] = self.data[winner_index]['Stack'] + premio_total
+            self.data[ winner_index ][ 'Saldo' ] = self.data[ winner_index ][ 'Stack' ] + premio_total
             self.crupier_saldo += rake_total
-            self.crupier_label.config(text=f"Crupier Saldo: {self.crupier_saldo}")
+            self.crupier_label.config( text = f"Crupier Saldo: { self.crupier_saldo }" )
 
             # Resetear las apuestas y actualizar los saldos
-            for i in range(len(self.data)):
+            for i in range( len( self.data ) ):
                 if i != winner_index:
-                    self.data[i]['Saldo'] = self.data[i]['Stack']
-                self.data[i]['Apostado por jugador'] = 0.0
-                self.data[i]['Ciegas'] = 0.0
-                self.data[i]['Preflop'] = 0.0
-                self.data[i]['Flop'] = 0.0
-                self.data[i]['Turn'] = 0.0
-                self.data[i]['River'] = 0.0
-                self.data[i]['Stack'] = self.data[i]['Saldo']
+                    self.data[ i ][ 'Saldo' ] = self.data[ i ][ 'Stack' ]
+                self.data[ i ][ 'Apostado por jugador' ] = 0.0
+                self.data[ i ][ 'Ciegas' ] = 0.0
+                self.data[ i ][ 'Preflop' ] = 0.0
+                self.data[ i ][ 'Flop' ] = 0.0
+                self.data[ i ][ 'Turn' ] = 0.0
+                self.data[ i ][ 'River' ] = 0.0
+                self.data[ i ][ 'Stack' ] = self.data[ i ][ 'Saldo' ]
 
             self.update_table()
             self.update_totals()
         else:
-            messagebox.showerror("Error", "Ganador no válido")
+            messagebox.showerror( "Error", "Ganador no válido" )
 
-    def update_data(self, i, col, var):
+    def update_data( self, i, col, var ):
         try:
-            value = float(var.get())
-            self.data[i][col] = value
+            value = float( var.get() )
+            self.data[ i ][ col ] = value
 
             # Actualización automática de Apostado por jugador y Stack
-            if col in ["Saldo", "Ciegas", "Preflop", "Flop", "Turn", "River"]:
-                self.data[i]["Apostado por jugador"] = sum(self.data[i][key] for key in ["Ciegas", "Preflop", "Flop", "Turn", "River"])
-                self.data[i]["Stack"] = self.data[i]["Saldo"] - self.data[i]["Apostado por jugador"]
-                self.vars[(i, "Apostado por jugador")].set(self.data[i]["Apostado por jugador"])
-                self.vars[(i, "Stack")].set(self.data[i]["Stack"])
+            if col in [ "Saldo", "Ciegas", "Preflop", "Flop", "Turn", "River" ]:
+                self.data[ i ][ "Apostado por jugador" ] = sum( self.data[ i ][ key ] for key in [ "Ciegas", "Preflop", "Flop", "Turn", "River" ] )
+                self.data[ i ][ "Stack" ] = self.data[ i ][ "Saldo" ] - self.data[ i ][ "Apostado por jugador" ]
+                self.vars[ ( i, "Apostado por jugador" ) ].set( self.data[ i ][ "Apostado por jugador" ] )
+                self.vars[ ( i, "Stack" ) ].set( self.data[ i ][ "Stack" ] )
 
             self.update_totals()
 
         except ValueError:
-            self.data[i][col] = var.get()
+            self.data[ i ][ col ] = var.get()
 
-    def update_totals(self):
+    def update_totals( self ):
         # Actualización del Bote total
-        bote_total = sum(self.data[i]["Apostado por jugador"] for i in range(len(self.data)))
-        self.total_vars["Bote"].set(bote_total)
+        bote_total = sum( self.data[ i ][ "Apostado por jugador" ] for i in range( len( self.data ) ) )
+        self.total_vars[ "Bote" ].set( bote_total )
 
         # Actualización del Rake y Premio
-        rake_total = bote_total * (self.rake_var.get() / 100)
+        rake_total = bote_total * ( self.rake_var.get() / 100 )
         premio_total = bote_total - rake_total
-        self.total_vars["Rake"].set(rake_total)
-        self.total_vars["Premio"].set(premio_total)
+        self.total_vars[ "Rake" ].set( rake_total )
+        self.total_vars[ "Premio" ].set( premio_total )
 
-    def update_table(self):
-        for (i, col), var in self.vars.items():
-            var.set(self.data[i][col])
+    def update_table( self ):
+        for ( i, col ), var in self.vars.items():
+            var.set( self.data[ i ][ col ] )
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = PokerApp(root)
+    app = PokerApp( root )
     root.mainloop()
